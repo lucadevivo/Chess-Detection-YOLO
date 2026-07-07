@@ -1,3 +1,51 @@
 <!doctype html>
-<html lang="it"><head><meta charset="utf-8"><title>Chess Vision</title></head>
-<body><p>placeholder</p></body></html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chess Vision</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>Chess Vision</h1>
+  <div class="row">
+    <div class="col">
+      <video id="preview" autoplay playsinline muted></video>
+      <div class="controls">
+        <label>Fotocamera
+          <select id="camera"></select>
+        </label>
+        <label>Bianco gioca da
+          <select id="white_side">
+            <option value="bottom">in basso</option>
+            <option value="top">in alto</option>
+            <option value="left">sinistra</option>
+            <option value="right">destra</option>
+          </select>
+        </label>
+        <label>Turno
+          <select id="turn">
+            <option value="w">Bianco</option>
+            <option value="b">Nero</option>
+          </select>
+        </label>
+        <button id="analyze">Analizza</button>
+      </div>
+      <p id="status"></p>
+    </div>
+    <div class="col">
+      <div class="eval-wrap">
+        <div class="eval-bar"><div id="eval-white"></div></div>
+        <span id="eval-label">—</span>
+      </div>
+      <div class="board-wrap">
+        <img id="board" alt="board">
+        <canvas id="arrow"></canvas>
+      </div>
+      <p id="bestmove"></p>
+    </div>
+  </div>
+  <canvas id="capture" hidden></canvas>
+  <script src="/static/app.js"></script>
+</body>
+</html>
