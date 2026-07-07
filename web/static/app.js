@@ -230,15 +230,31 @@ function drawArrow(bestmove) {
   if (!bestmove || !bestmove.from) return;
   const cell = c.width / 8;
   const center = ([r, col]) => [col * cell + cell / 2, r * cell + cell / 2];
-  const [x1, y1] = center(bestmove.from), [x2, y2] = center(bestmove.to);
-  ctx.strokeStyle = "oklch(0.78 0.16 70)"; ctx.fillStyle = "oklch(0.78 0.16 70)";
-  ctx.lineWidth = Math.max(3, cell * 0.13); ctx.lineCap = "round";
-  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-  const a = Math.atan2(y2 - y1, x2 - x1), h = cell * 0.38;
-  ctx.beginPath(); ctx.moveTo(x2, y2);
-  ctx.lineTo(x2 - h * Math.cos(a - 0.4), y2 - h * Math.sin(a - 0.4));
-  ctx.lineTo(x2 - h * Math.cos(a + 0.4), y2 - h * Math.sin(a + 0.4));
-  ctx.closePath(); ctx.fill();
+  const [fx, fy] = center(bestmove.from), [tx, ty] = center(bestmove.to);
+  const ang = Math.atan2(ty - fy, tx - fx);
+  const dist = Math.hypot(tx - fx, ty - fy);
+
+  // proporzioni stile chess.com
+  const shaft = cell * 0.28, headW = cell * 0.62, headL = cell * 0.52;
+  const gap = cell * 0.30;                 // parte poco dopo il centro casella
+  const len = Math.max(headL, dist - gap);
+  const body = Math.max(0, len - headL);
+  const x0 = fx + Math.cos(ang) * gap, y0 = fy + Math.sin(ang) * gap;
+
+  // poligono asta+testa in coordinate locali (x = direzione), poi ruotato
+  const pts = [
+    [0, -shaft / 2], [body, -shaft / 2], [body, -headW / 2],
+    [len, 0], [body, headW / 2], [body, shaft / 2], [0, shaft / 2],
+  ];
+  ctx.save();
+  ctx.translate(x0, y0); ctx.rotate(ang);
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  pts.forEach(([px, py], i) => (i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)));
+  ctx.closePath();
+  ctx.fillStyle = "rgba(255, 170, 0, 0.82)";   // arancio chess.com
+  ctx.fill();
+  ctx.restore();
 }
 
 /* ---------- ui plumbing ---------- */

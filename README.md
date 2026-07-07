@@ -33,20 +33,52 @@ Per avviare l'applicazione, è consigliabile prima verificare l'indice della tel
 
 Durante l'esecuzione, utilizzare il mouse per allineare i punti rossi agli angoli della scacchiera reale.
 
-## Web app (Docker)
+## Web app
 
-Riconoscimento + valutazione stile chess.com nel browser.
+Riconoscimento della scacchiera + valutazione stile chess.com nel browser: rileva i
+pezzi via YOLOv8, costruisce la posizione (FEN) e la valuta con Stockfish (barra di
+vantaggio + mossa migliore con freccia). Codice in `web/`.
 
+### Prerequisiti
+- **Docker** (unica dipendenza per l'utente finale), oppure per l'avvio manuale: Python 3.12 + Stockfish.
+- Un **browser** moderno con webcam (Chrome/Edge/Firefox/Safari).
+
+### Avvio con Docker (consigliato — Linux / macOS / Windows)
 ```bash
 docker build -t chess-vision .
 docker run --rm -p 8000:8000 chess-vision
 # apri http://localhost:8000
 ```
+La webcam viene letta dal **browser** (getUserMedia): nessun passthrough di device,
+quindi funziona su qualsiasi sistema operativo con Docker Desktop/Engine. `getUserMedia`
+richiede `localhost` (ok con `-p`) o HTTPS.
 
-La webcam viene letta dal browser (getUserMedia), quindi funziona su Linux/Mac/Windows
-senza passthrough di device. Scegli la fotocamera, il lato del Bianco e il turno, poi
-premi "Analizza": ottieni la posizione rilevata, la barra di valutazione e la mossa
-migliore (Stockfish). Codice in `web/`.
+### Avvio senza Docker
+```bash
+python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+pip install -r web/requirements.txt
+# installa Stockfish: Debian/Ubuntu `apt install stockfish`, macOS `brew install stockfish`,
+# Arch `pacman -S stockfish`, Windows: scarica il binario e mettilo nel PATH
+uvicorn web.app:app --host 0.0.0.0 --port 8000
+```
+
+### Uso
+1. **Cattura** un fotogramma della scacchiera inquadrata.
+2. Trascina i **4 punti** sui marker d'angolo stampati (L / ★ / ■ / ▲); partono già
+   pre-posizionati dal rilevamento.
+3. Scegli **da che lato gioca il Bianco** e **di chi è il turno**.
+4. **Analizza**: ottieni la scacchiera 2D, la barra di valutazione e la mossa migliore.
+
+### Test
+```bash
+pip install pytest
+python -m pytest tests/ -q
+```
+
+### Limiti noti
+Da una singola foto (posizione senza storico) **arrocco** ed **en passant** non sono
+deducibili e non sono considerati; scacco, matto e mosse legali sì (Stockfish).
 
 ---
 Sviluppato da Luca De Vivo per il corso di AI Lab.
