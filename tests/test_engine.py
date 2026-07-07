@@ -7,6 +7,14 @@ from web import engine
 stockfish_missing = shutil.which("stockfish") is None
 
 
+def test_illegal_position_raises_before_engine():
+    # posizione illegale (re nero sotto scacco, turno al Bianco): niente crash,
+    # niente spawn engine -> gira anche senza stockfish installato.
+    import pytest as _pt
+    with _pt.raises(engine.IllegalPosition):
+        engine.analyze("3k4/8/8/8/8/8/8/3RK3 w - - 0 1", movetime=0.5)
+
+
 @pytest.mark.skipif(stockfish_missing, reason="binario stockfish non installato")
 def test_mate_in_one():
     # Bianco muove e matta: Rb1-b8#

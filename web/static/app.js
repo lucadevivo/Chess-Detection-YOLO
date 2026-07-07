@@ -91,17 +91,22 @@ async function analyze() {
     fd.append("turn", $("turn").value);
     const r = await fetch("/analyze", { method: "POST", body: fd });
     const body = await r.json();
+    // mostra comunque la board 2D se disponibile (anche in errore)
+    if (body.board && body.board.png_b64) {
+      $("board").onload = () => drawArrow(body.ok ? body.bestmove : null);
+      $("board").src = "data:image/png;base64," + body.board.png_b64;
+    }
     if (!body.ok) {
       const msg = { corner: "Riquadra bene la scacchiera (4 marker).",
                     fen: "Posizione non valida: " + (body.detail || ""),
                     engine: "Motore non disponibile: " + (body.detail || ""),
                     image: "Immagine non valida." };
       $("status").textContent = msg[body.reason] || body.detail || "Errore.";
+      setEval({ cp: null, mate: null });
+      $("bestmove").textContent = "";
       return;
     }
     $("status").textContent = "";
-    $("board").onload = () => drawArrow(body.bestmove);
-    $("board").src = "data:image/png;base64," + body.board.png_b64;
     setEval(body.eval);
     $("bestmove").textContent = "Mossa migliore: " + (body.bestmove.uci || "-");
   } catch (e) {

@@ -14,6 +14,11 @@ class EngineUnavailable(RuntimeError):
     pass
 
 
+class IllegalPosition(ValueError):
+    """Posizione non legale: NON passarla a Stockfish (va in segfault)."""
+    pass
+
+
 def _find_stockfish():
     for cand in _CANDIDATES:
         p = shutil.which(cand) if os.sep not in cand else (cand if os.path.exists(cand) else None)
@@ -24,10 +29,14 @@ def _find_stockfish():
 
 def analyze(fen, movetime=DEFAULT_MOVETIME):
     """FEN -> {cp, mate, bestmove}. cp/mate dal punto di vista del Bianco."""
+    board = chess.Board(fen)  # solleva ValueError se FEN malformata
+    # Stockfish segfaulta su posizioni illegali (es. lato non di turno sotto scacco):
+    # filtrarle PRIMA di spawnare l'engine.
+    if not board.is_valid():
+        raise IllegalPosition(f"posizione non legale ({board.status()!r})")
     binary = _find_stockfish()
     if binary is None:
         raise EngineUnavailable("binario 'stockfish' non trovato")
-    board = chess.Board(fen)  # solleva ValueError se FEN malformata
     limit = chess.engine.Limit(time=movetime)
     with chess.engine.SimpleEngine.popen_uci(binary) as eng:
         info = eng.analyse(board, limit)

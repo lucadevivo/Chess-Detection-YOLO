@@ -48,18 +48,22 @@ async def analyze(image: UploadFile = File(...),
     det = detect.detect(frame)
     res = board.build_fen(det, white_side, turn)
     if not res["ok"]:
-        return JSONResponse(res)
+        return JSONResponse(res)   # es. 'corner': niente griglia da mostrare
+
+    # Griglia disponibile: renderizza SEMPRE la board 2D, anche se l'engine fallisce.
+    png = graphics.render_scacchiera(res["grid"])          # BGR ndarray, griglia orientata
+    enc_ok, buf = cv2.imencode(".png", png)
+    board_payload = {"grid": res["grid"],
+                     "png_b64": base64.b64encode(buf.tobytes()).decode() if enc_ok else ""}
 
     try:
         ev = engine.analyze(res["fen"])
     except engine.EngineUnavailable as e:
-        return JSONResponse({"ok": False, "reason": "engine", "detail": str(e)})
-    except Exception as e:  # FEN accettata da noi ma illegale per l'engine
-        return JSONResponse({"ok": False, "reason": "fen", "detail": str(e)})
-
-    png = graphics.render_scacchiera(res["grid"])          # BGR ndarray, griglia orientata
-    ok, buf = cv2.imencode(".png", png)
-    png_b64 = base64.b64encode(buf.tobytes()).decode() if ok else ""
+        return JSONResponse({"ok": False, "reason": "engine", "detail": str(e),
+                             "fen": res["fen"], "board": board_payload})
+    except (engine.IllegalPosition, ValueError) as e:  # posizione non legale
+        return JSONResponse({"ok": False, "reason": "fen", "detail": str(e),
+                             "fen": res["fen"], "board": board_payload})
 
     rc = board.uci_to_rc(ev["bestmove"]) if ev.get("bestmove") else None
     return JSONResponse({
@@ -67,5 +71,5 @@ async def analyze(image: UploadFile = File(...),
         "fen": res["fen"],
         "eval": {"cp": ev["cp"], "mate": ev["mate"]},
         "bestmove": {"uci": ev["bestmove"], **(rc or {})},
-        "board": {"grid": res["grid"], "png_b64": png_b64},
+        "board": board_payload,
     })
