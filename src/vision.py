@@ -13,7 +13,7 @@ def applica_euristica_re_regina(pezzi):
             # Nessun re rilevato ma almeno una regina: una posizione valida ha SEMPRE
             # un re, quindi la regina meno "sicura" (o l'unica) e' in realta' il re.
             regine_ordinate = sorted(regine, key=lambda x: x['conf'], reverse=True)
-            pezzo_da_correggere = regine_ordinate[-1]
+            pezzo_da_correggere = regine_ordinate[0]   # la regina piu' probabile e' il re
             pezzo_da_correggere['classe'] = f'{colore}-king'
             print(f"🔧 Correzione Logica: Convertita {colore}-queen in {colore}-king")
 

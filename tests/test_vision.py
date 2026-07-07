@@ -11,12 +11,13 @@ def test_lone_queen_no_king_becomes_king():
     assert pz[0]["classe"] == "white-king"
 
 
-def test_two_queens_no_king_lowest_conf_becomes_king():
+def test_two_queens_no_king_highest_conf_becomes_king():
     pz = [{"classe": "black-queen", "conf": 0.9}, {"classe": "black-queen", "conf": 0.4}]
     applica_euristica_re_regina(pz)
     assert sorted(p["classe"] for p in pz) == ["black-king", "black-queen"]
-    # la regina a conf più alta resta regina
-    assert next(p for p in pz if p["conf"] == 0.9)["classe"] == "black-queen"
+    # la regina più probabile (conf più alta) diventa il re
+    assert next(p for p in pz if p["conf"] == 0.9)["classe"] == "black-king"
+    assert next(p for p in pz if p["conf"] == 0.4)["classe"] == "black-queen"
 
 
 def test_king_and_queen_untouched():
