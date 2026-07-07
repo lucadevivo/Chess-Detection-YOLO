@@ -1,5 +1,15 @@
 """Griglia 8x8 rilevata -> FEN. Funzioni pure, testabili in isolamento."""
+import os
+import sys
+
 import numpy as np
+
+_SRC = os.path.join(os.path.dirname(__file__), "..", "src")
+if _SRC not in sys.path:
+    sys.path.insert(0, _SRC)
+import mapping  # noqa: E402  (modulo esistente in src/)
+
+CORNER_NAMES = ["L-corner", "star-corner", "square-corner", "triangle-corner"]
 
 # rotazioni np.rot90 (CCW) che portano il lato del Bianco in basso (rank1).
 # left (colonna c=0) -> bottom con k=1 ; right (c=7) -> bottom con k=3 ; top -> 180.
@@ -77,3 +87,17 @@ def uci_to_rc(uci):
         rank = int(s[1])
         return [8 - rank, file]
     return {"from": sq(uci[0:2]), "to": sq(uci[2:4])}
+
+
+def build_fen(detection, white_side, turn):
+    """detection {pieces, corners} -> FEN. Errore 'corner' se mancano i 4 marker."""
+    corners = detection.get("corners", {})
+    if not all(name in corners for name in CORNER_NAMES):
+        return {"ok": False, "reason": "corner",
+                "detail": "servono tutti e 4 i marker d'angolo"}
+    try:
+        M = mapping.calcola_omografia(corners)
+        grid = mapping.proietta_pezzi(detection.get("pieces", []), M)
+    except Exception as e:  # omografia degenere / matrice non invertibile
+        return {"ok": False, "reason": "corner", "detail": f"omografia fallita: {e}"}
+    return grid_to_fen(grid, white_side, turn)

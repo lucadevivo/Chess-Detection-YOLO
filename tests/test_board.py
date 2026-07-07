@@ -69,3 +69,10 @@ def test_uci_to_rc():
     rc = board.uci_to_rc("e2e4")
     assert rc["from"] == [6, 4]   # e2: file e=4, rank2 -> row 8-2=6
     assert rc["to"] == [4, 4]     # e4: row 8-4=4
+
+
+def test_build_fen_missing_corners():
+    det = {"pieces": [], "corners": {"L-corner": (0, 0)}}  # <4 corner
+    res = board.build_fen(det, "bottom", "w")
+    assert res["ok"] is False
+    assert res["reason"] == "corner"
