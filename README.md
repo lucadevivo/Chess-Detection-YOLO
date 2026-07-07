@@ -33,5 +33,20 @@ Per avviare l'applicazione, è consigliabile prima verificare l'indice della tel
 
 Durante l'esecuzione, utilizzare il mouse per allineare i punti rossi agli angoli della scacchiera reale.
 
+## Web app (Docker)
+
+Riconoscimento + valutazione stile chess.com nel browser.
+
+```bash
+docker build -t chess-vision .
+docker run --rm -p 8000:8000 chess-vision
+# apri http://localhost:8000
+```
+
+La webcam viene letta dal browser (getUserMedia), quindi funziona su Linux/Mac/Windows
+senza passthrough di device. Scegli la fotocamera, il lato del Bianco e il turno, poi
+premi "Analizza": ottieni la posizione rilevata, la barra di valutazione e la mossa
+migliore (Stockfish). Codice in `web/`.
+
 ---
 Sviluppato da Luca De Vivo per il corso di AI Lab.

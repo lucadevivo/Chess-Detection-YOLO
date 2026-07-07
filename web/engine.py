@@ -1,24 +1,35 @@
 """Wrapper Stockfish via python-chess."""
+import os
 import shutil
 
 import chess
 import chess.engine
 
-STOCKFISH = "stockfish"      # binario nel PATH
 DEFAULT_MOVETIME = 1.0       # secondi
+# su Debian il pacchetto installa /usr/games/stockfish (non nel PATH di default)
+_CANDIDATES = ("stockfish", "/usr/games/stockfish", "/usr/local/bin/stockfish")
 
 
 class EngineUnavailable(RuntimeError):
     pass
 
 
+def _find_stockfish():
+    for cand in _CANDIDATES:
+        p = shutil.which(cand) if os.sep not in cand else (cand if os.path.exists(cand) else None)
+        if p:
+            return p
+    return None
+
+
 def analyze(fen, movetime=DEFAULT_MOVETIME):
     """FEN -> {cp, mate, bestmove}. cp/mate dal punto di vista del Bianco."""
-    if shutil.which(STOCKFISH) is None:
-        raise EngineUnavailable("binario 'stockfish' non trovato nel PATH")
+    binary = _find_stockfish()
+    if binary is None:
+        raise EngineUnavailable("binario 'stockfish' non trovato")
     board = chess.Board(fen)  # solleva ValueError se FEN malformata
     limit = chess.engine.Limit(time=movetime)
-    with chess.engine.SimpleEngine.popen_uci(STOCKFISH) as eng:
+    with chess.engine.SimpleEngine.popen_uci(binary) as eng:
         info = eng.analyse(board, limit)
         score = info["score"].white()
         best = eng.play(board, limit).move
