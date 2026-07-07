@@ -43,6 +43,7 @@ def test_grid_to_fen_missing_king():
     res = board.grid_to_fen(g, "bottom", "w")
     assert res["ok"] is False
     assert res["reason"] == "fen"
+    assert res.get("grid") is not None   # griglia inclusa per mostrare comunque la board 2D
 
 
 def test_grid_to_fen_extra_king_kept_one():

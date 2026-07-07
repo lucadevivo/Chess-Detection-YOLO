@@ -56,7 +56,7 @@ def grid_to_fen(grid, white_side, turn):
     o = orient_grid(grid, white_side)   # o[0]=rank8 (alto), o[7]=rank1 (basso)
     seen = _dedup_kings(o)
     if not seen["K"] or not seen["k"]:
-        return {"ok": False, "reason": "fen",
+        return {"ok": False, "reason": "fen", "grid": o,
                 "detail": f"re mancante (bianco={seen['K']}, nero={seen['k']})"}
     ranks = []
     for r in range(8):

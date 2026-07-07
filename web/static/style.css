@@ -16,6 +16,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }   /* le regole display: sotto non devono ignorare hidden */
 html { color-scheme: dark; }
 body {
   margin: 0;

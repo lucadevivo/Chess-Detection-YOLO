@@ -71,14 +71,21 @@ async def analyze(image: UploadFile = File(...),
             return JSONResponse({"ok": False, "reason": "corner",
                                  "detail": "corner manuali non validi"})
     res = board.build_fen(det, white_side, turn)
-    if not res["ok"]:
-        return JSONResponse(res)   # es. 'corner': niente griglia da mostrare
 
-    # Griglia disponibile: renderizza SEMPRE la board 2D, anche se l'engine fallisce.
-    png = graphics.render_scacchiera(res["grid"])          # BGR ndarray, griglia orientata
-    enc_ok, buf = cv2.imencode(".png", png)
-    board_payload = {"grid": res["grid"],
-                     "png_b64": base64.b64encode(buf.tobytes()).decode() if enc_ok else ""}
+    # Renderizza la board 2D ogni volta che c'è una griglia, anche se la posizione
+    # non è valida o l'engine non è disponibile.
+    board_payload = None
+    if res.get("grid") is not None:
+        png = graphics.render_scacchiera(res["grid"])      # BGR ndarray, griglia orientata
+        enc_ok, buf = cv2.imencode(".png", png)
+        board_payload = {"grid": res["grid"],
+                         "png_b64": base64.b64encode(buf.tobytes()).decode() if enc_ok else ""}
+
+    if not res["ok"]:   # es. 'corner' (no griglia) o 'fen' (griglia sì, ma posizione invalida)
+        out = {"ok": False, "reason": res["reason"], "detail": res.get("detail")}
+        if board_payload:
+            out["board"] = board_payload
+        return JSONResponse(out)
 
     try:
         ev = engine.analyze(res["fen"])
