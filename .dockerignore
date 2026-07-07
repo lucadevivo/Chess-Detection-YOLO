@@ -1,0 +1,11 @@
+.venv
+dataset_pipeline/out
+dataset_pipeline/_dups
+dataset_pipeline/_dropped
+dataset_pipeline/videos
+dataset_pipeline/*.mp4
+**/__pycache__
+runs
+*.mp4
+docs
+.git
