@@ -1,5 +1,6 @@
 """FastAPI: serve il frontend e l'endpoint /analyze."""
 import base64
+import json
 import os
 import sys
 
@@ -34,18 +35,41 @@ def index():
     return FileResponse(os.path.join(STATIC, "index.html"))
 
 
+def _decode(raw):
+    arr = np.frombuffer(raw, np.uint8)
+    return cv2.imdecode(arr, cv2.IMREAD_COLOR)
+
+
+@app.post("/detect_corners")
+async def detect_corners(image: UploadFile = File(...)):
+    """Rileva i 4 marker d'angolo per pre-posizionare i punti trascinabili."""
+    frame = _decode(await image.read())
+    if frame is None:
+        return JSONResponse({"ok": False, "reason": "image"})
+    det = detect.detect(frame)
+    corners = {name: [int(x), int(y)] for name, (x, y) in det["corners"].items()}
+    h, w = frame.shape[:2]
+    return JSONResponse({"ok": True, "corners": corners, "size": [w, h]})
+
+
 @app.post("/analyze")
 async def analyze(image: UploadFile = File(...),
                   white_side: str = Form(...),
-                  turn: str = Form(...)):
-    raw = await image.read()
-    arr = np.frombuffer(raw, np.uint8)
-    frame = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+                  turn: str = Form(...),
+                  corners: str = Form(None)):
+    frame = _decode(await image.read())
     if frame is None:
         return JSONResponse({"ok": False, "reason": "image",
                              "detail": "immagine non decodificabile"})
 
     det = detect.detect(frame)
+    if corners:  # corner regolati a mano dall'utente: hanno priorità su YOLO
+        try:
+            manual = json.loads(corners)
+            det["corners"] = {k: (float(v[0]), float(v[1])) for k, v in manual.items()}
+        except (ValueError, TypeError, KeyError, IndexError):
+            return JSONResponse({"ok": False, "reason": "corner",
+                                 "detail": "corner manuali non validi"})
     res = board.build_fen(det, white_side, turn)
     if not res["ok"]:
         return JSONResponse(res)   # es. 'corner': niente griglia da mostrare

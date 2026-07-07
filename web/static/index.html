@@ -7,45 +7,88 @@
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <h1>Chess Vision</h1>
-  <div class="row">
-    <div class="col">
-      <video id="preview" autoplay playsinline muted></video>
-      <div class="controls">
-        <label>Fotocamera
-          <select id="camera"></select>
-        </label>
-        <label>Bianco gioca da
-          <select id="white_side">
-            <option value="bottom">in basso</option>
-            <option value="top">in alto</option>
-            <option value="left">sinistra</option>
-            <option value="right">destra</option>
-          </select>
-        </label>
-        <label>Turno
-          <select id="turn">
-            <option value="w">Bianco</option>
-            <option value="b">Nero</option>
-          </select>
-        </label>
-        <button id="analyze">Analizza</button>
-      </div>
-      <p id="status"></p>
-    </div>
-    <div class="col">
-      <div class="eval-wrap">
-        <div class="eval-bar"><div id="eval-white"></div></div>
-        <span id="eval-label">—</span>
-      </div>
-      <div class="board-wrap">
-        <img id="board" alt="board">
-        <canvas id="arrow"></canvas>
-      </div>
-      <p id="bestmove"></p>
+  <div class="wrap">
+    <header class="top">
+      <h1>Chess Vision</h1>
+      <span class="sub">rileva la scacchiera, valuta la posizione, trova la mossa migliore</span>
+    </header>
+
+    <div class="grid">
+      <!-- COLONNA SINISTRA: cattura + calibrazione -->
+      <section class="panel">
+        <h2>1 · Inquadra e cattura</h2>
+        <ol class="steps">
+          <li><b>Cattura</b> un fotogramma</li>
+          <li>trascina i <b>4 punti</b> sugli angoli</li>
+          <li><b>Analizza</b></li>
+        </ol>
+
+        <div class="stage" id="stage">
+          <video id="preview" autoplay playsinline muted></video>
+          <img class="still" id="still" alt="" hidden>
+          <div class="handles" id="handles" hidden>
+            <svg id="frameline"><polygon points="" fill="none" stroke="oklch(0.72 0.15 150 / .8)" stroke-width="2"/></svg>
+          </div>
+          <div class="hint" id="stageHint" hidden></div>
+        </div>
+
+        <div class="controls">
+          <div class="field" id="cameraField" hidden>
+            <label class="lbl" for="camera">Fotocamera</label>
+            <select id="camera"></select>
+          </div>
+
+          <div class="field">
+            <span class="lbl">Il Bianco gioca da</span>
+            <div class="seg" id="white_side" role="group" aria-label="Lato del Bianco">
+              <button data-v="bottom" aria-pressed="true">Basso</button>
+              <button data-v="top" aria-pressed="false">Alto</button>
+              <button data-v="left" aria-pressed="false">Sinistra</button>
+              <button data-v="right" aria-pressed="false">Destra</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="lbl">Turno</span>
+            <div class="seg" id="turn" role="group" aria-label="Turno">
+              <button data-v="w" aria-pressed="true">Bianco</button>
+              <button data-v="b" aria-pressed="false">Nero</button>
+            </div>
+          </div>
+
+          <div class="row">
+            <button class="btn primary" id="capture">Cattura</button>
+            <button class="btn" id="recapture" hidden>Ri-cattura</button>
+            <button class="btn primary" id="analyze" hidden>Analizza</button>
+          </div>
+        </div>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+      </section>
+
+      <!-- COLONNA DESTRA: analisi -->
+      <section class="panel">
+        <h2>2 · Analisi</h2>
+        <div class="analysis">
+          <div class="evalbar" title="Vantaggio: alto = Bianco">
+            <div class="white" id="evalWhite"></div>
+            <div class="mid"></div>
+          </div>
+          <div class="board-wrap" id="boardWrap">
+            <img id="board" alt="Scacchiera rilevata">
+            <canvas id="arrow"></canvas>
+            <p class="board-empty" id="boardEmpty">La scacchiera 2D comparirà qui dopo l'analisi.</p>
+          </div>
+        </div>
+        <div class="readout">
+          <span class="score" id="score">—</span>
+          <span class="best" id="best"></span>
+        </div>
+        <p class="fen" id="fen"></p>
+      </section>
     </div>
   </div>
-  <canvas id="capture" hidden></canvas>
+
+  <canvas id="capbuf" hidden></canvas>
   <script src="/static/app.js"></script>
 </body>
 </html>
