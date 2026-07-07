@@ -9,15 +9,17 @@ def applica_euristica_re_regina(pezzi):
         regine = [p for p in pezzi if p['classe'] == f'{colore}-queen']
         re = [p for p in pezzi if p['classe'] == f'{colore}-king']
         
-        if len(regine) > 1 and len(re) == 0:
+        if len(re) == 0 and len(regine) >= 1:
+            # Nessun re rilevato ma almeno una regina: una posizione valida ha SEMPRE
+            # un re, quindi la regina meno "sicura" (o l'unica) e' in realta' il re.
             regine_ordinate = sorted(regine, key=lambda x: x['conf'], reverse=True)
-            pezzo_da_correggere = regine_ordinate[1]
+            pezzo_da_correggere = regine_ordinate[-1]
             pezzo_da_correggere['classe'] = f'{colore}-king'
             print(f"🔧 Correzione Logica: Convertita {colore}-queen in {colore}-king")
-            
+
         elif len(re) > 1 and len(regine) == 0:
             re_ordinati = sorted(re, key=lambda x: x['conf'], reverse=True)
-            pezzo_da_correggere = re_ordinati[1]
+            pezzo_da_correggere = re_ordinati[-1]
             pezzo_da_correggere['classe'] = f'{colore}-queen'
             print(f"🔧 Correzione Logica: Convertito {colore}-king in {colore}-queen")
 
