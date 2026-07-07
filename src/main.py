@@ -65,9 +65,9 @@ def main():
     print("🧠 1. Caricamento del modello YOLOv8 in memoria...")
     model = YOLO('best.pt')
     
-    print("📷 2. Inizializzazione della videocamera dello Smartphone...")
-    URL_TELEFONO = "http://192.168.0.142:4747/video" 
-    cap = cv2.VideoCapture(URL_TELEFONO)
+    print("📷 2. Inizializzazione della webcam locale...")
+    SORGENTE = 2  # LifeCam Cinema collegata /dev/video2 (nativa "HD Webcam" = 0); DroidCam: "http://<ip>:4747/video"
+    cap = cv2.VideoCapture(SORGENTE)
     
     if not cap.isOpened():
         print("❌ Errore critico: Impossibile accedere alla videocamera.")
