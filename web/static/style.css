@@ -40,7 +40,7 @@ header.top h1 {
 header.top .sub { color: var(--muted); font-size: .95rem; }
 
 .grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
-@media (min-width: 860px) { .grid { grid-template-columns: 1.1fr .9fr; align-items: start; } }
+@media (min-width: 860px) { .grid { grid-template-columns: 1fr 1fr; align-items: stretch; } }
 
 .panel {
   background: var(--surface);

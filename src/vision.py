@@ -6,22 +6,24 @@ def applica_euristica_re_regina(pezzi):
     Corregge le allucinazioni visive di YOLO applicando le regole degli scacchi.
     """
     for colore in ['white', 'black']:
-        regine = [p for p in pezzi if p['classe'] == f'{colore}-queen']
+        # Regola 1: max UN re per colore. Se ne compaiono piu' d'uno (impossibile),
+        # tieni il piu' probabile e converti gli altri in regina (confusione tipica
+        # re<->regina; le regine multiple sono legali, i re multipli no).
         re = [p for p in pezzi if p['classe'] == f'{colore}-king']
-        
-        if len(re) == 0 and len(regine) >= 1:
-            # Nessun re rilevato ma almeno una regina: una posizione valida ha SEMPRE
-            # un re, quindi la regina meno "sicura" (o l'unica) e' in realta' il re.
-            regine_ordinate = sorted(regine, key=lambda x: x['conf'], reverse=True)
-            pezzo_da_correggere = regine_ordinate[0]   # la regina piu' probabile e' il re
-            pezzo_da_correggere['classe'] = f'{colore}-king'
-            print(f"🔧 Correzione Logica: Convertita {colore}-queen in {colore}-king")
-
-        elif len(re) > 1 and len(regine) == 0:
+        if len(re) > 1:
             re_ordinati = sorted(re, key=lambda x: x['conf'], reverse=True)
-            pezzo_da_correggere = re_ordinati[-1]
-            pezzo_da_correggere['classe'] = f'{colore}-queen'
-            print(f"🔧 Correzione Logica: Convertito {colore}-king in {colore}-queen")
+            for extra in re_ordinati[1:]:
+                extra['classe'] = f'{colore}-queen'
+                print(f"🔧 Correzione Logica: Convertito {colore}-king in {colore}-queen")
+
+        # Regola 2: se non c'e' nessun re ma c'e' almeno una regina, una posizione
+        # valida ha SEMPRE un re -> la regina piu' probabile (conf max) e' in realta' il re.
+        re = [p for p in pezzi if p['classe'] == f'{colore}-king']
+        regine = [p for p in pezzi if p['classe'] == f'{colore}-queen']
+        if len(re) == 0 and len(regine) >= 1:
+            regine_ordinate = sorted(regine, key=lambda x: x['conf'], reverse=True)
+            regine_ordinate[0]['classe'] = f'{colore}-king'
+            print(f"🔧 Correzione Logica: Convertita {colore}-queen in {colore}-king")
 
     return pezzi
 
