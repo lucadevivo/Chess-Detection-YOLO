@@ -1,2 +1,12 @@
 __pycache__/
 .pytest_cache/
+.venv/
+*.pyc
+runs/
+*.mp4
+dataset_pipeline/out/
+dataset_pipeline/_dups/
+dataset_pipeline/_dropped/
+dataset_pipeline/videos/
+docs/superpowers/
+best_pre_retrain_*.pt
