@@ -77,4 +77,4 @@ possono correggere a mano prima di analizzare.
 
 ---
 
-Progetto per il corso di AI Lab — Luca De Vivo.
+Progetto per il corso di AI Lab — Luca De Vivo, Lorenzo Gentilezza.
